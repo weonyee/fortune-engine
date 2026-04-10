@@ -142,6 +142,22 @@
     background-position: right 12px center;
   }
 
+  /* 인라인 에러 아이콘 */
+  .field-error {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M12 3L2 21h20L12 3z' stroke='%23e04040' stroke-width='1.5' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M12 10v4' stroke='%23e04040' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17' r='0.8' fill='%23e04040'/%3E%3C/svg%3E") no-repeat center/contain;
+  }
+  .field-error.show { opacity: 1; }
+  .field.invalid { border-color: #e0404055; box-shadow: none; }
+
   /* 시간 입력 */
   #timeInput { text-align: center; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
   .time-badge {
@@ -365,34 +381,21 @@
   }
   .saved-card:active { transform: translateY(0); box-shadow: var(--shadow); }
   .saved-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 10px;
   }
   .saved-name {
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .saved-detail {
-    font-size: 0.72rem;
-    color: var(--text-tertiary);
-  }
-  .saved-pillars {
-    display: flex;
-    gap: 6px;
-    margin-left: 12px;
-    flex-shrink: 0;
-  }
-  .saved-pillars span {
     font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    color: var(--text-tertiary);
   }
   .saved-del {
     margin-left: 10px;
@@ -526,11 +529,13 @@
   <div class="section">
     <div class="section-label">생년월일시</div>
     <div class="input-row">
-      <div class="input-box">
+      <div class="input-box" style="position:relative;">
         <input type="text" id="birthdate" class="field" inputmode="numeric" maxlength="14" placeholder="YYYY / MM / DD" autocomplete="off">
+        <span class="field-error" id="dateError"></span>
       </div>
       <div class="input-box" style="flex:0 0 120px; position:relative;">
         <input type="text" id="timeInput" class="field" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off">
+        <span class="field-error" id="timeError"></span>
         <div class="time-badge" id="timeBadge"></div>
       </div>
     </div>
@@ -646,10 +651,13 @@
     } else {
       this.value = raw;
     }
+    validateDate();
     syncBtn();
   });
 
   // 날짜 파싱 헬퍼
+  const $dateError = document.getElementById('dateError');
+
   function parseDateValue() {
     const raw = $date.value.replace(/[^0-9]/g, '');
     if (raw.length !== 8) return null;
@@ -657,7 +665,42 @@
     const m = parseInt(raw.slice(4, 6));
     const d = parseInt(raw.slice(6, 8));
     if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+    // 실제 날짜 유효성 (윤년 등)
+    const test = new Date(y, m - 1, d);
+    if (test.getFullYear() !== y || test.getMonth() !== m - 1 || test.getDate() !== d) return null;
     return { y, m, d, iso: `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}` };
+  }
+
+  function validateDate() {
+    const raw = $date.value.replace(/[^0-9]/g, '');
+    // 8자리 미만이면 아직 입력 중 → 에러 표시 안함
+    if (raw.length < 8) {
+      $dateError.textContent = '';
+      $dateError.classList.remove('show');
+      $date.classList.remove('invalid');
+      return;
+    }
+    const y = parseInt(raw.slice(0, 4));
+    const m = parseInt(raw.slice(4, 6));
+    const d = parseInt(raw.slice(6, 8));
+
+    let invalid = false;
+    if (y < 1900 || y > 2050) invalid = true;
+    else if (m < 1 || m > 12) invalid = true;
+    else if (d < 1 || d > 31) invalid = true;
+    else {
+      const test = new Date(y, m - 1, d);
+      if (test.getFullYear() !== y || test.getMonth() !== m - 1 || test.getDate() !== d) invalid = true;
+    }
+
+    if (invalid) {
+      $dateError.classList.add('show');
+      $date.classList.add('invalid');
+    } else {
+      $dateError.textContent = '';
+      $dateError.classList.remove('show');
+      $date.classList.remove('invalid');
+    }
   }
 
   // ── 시간 자동 포맷 + 시간 모름 자동 토글 ──
@@ -671,6 +714,8 @@
     } else {
       this.value = raw;
     }
+
+    const $timeError = document.getElementById('timeError');
 
     // 4자리 완성 → 시진 매칭 + 시간모름 비활성
     if (raw.length === 4) {
@@ -687,16 +732,24 @@
         $noTime.checked = false;
         $noTime.disabled = true;
         $noTime.parentElement.style.opacity = '0.35';
+        // 에러 해제
+        $timeError.classList.remove('show');
+        $timeInput.classList.remove('invalid');
       } else {
-        $timeBadge.textContent = '유효하지 않은 시간';
-        $timeBadge.classList.add('visible');
+        // 유효하지 않은 시간
+        $timeBadge.textContent = '';
+        $timeBadge.classList.remove('visible');
         delete this.dataset.sijinValue;
+        $timeError.classList.add('show');
+        $timeInput.classList.add('invalid');
       }
     } else {
-      // 미완성 → 시간모름 다시 활성화
+      // 미완성 → 에러 해제 + 시간모름 다시 활성화
       $timeBadge.textContent = '';
       $timeBadge.classList.remove('visible');
       delete this.dataset.sijinValue;
+      $timeError.classList.remove('show');
+      $timeInput.classList.remove('invalid');
       $noTime.disabled = false;
       $noTime.parentElement.style.opacity = '1';
     }
@@ -779,9 +832,11 @@
     const sijin = $timeInput.dataset.sijinValue;
     const rv = document.getElementById('region').value;
 
+    // 일간 텍스트 추출 (일주 천간 = 테이블 천간행의 2번째 셀)
     const tbl = document.getElementById('sajuTable');
-    const chars = tbl.querySelectorAll('.ch');
-    const pillarTexts = Array.from(chars).map(el => el.textContent);
+    const cgRow = tbl.querySelectorAll('tr')[1]; // 천간 행
+    const ilganEl = cgRow ? cgRow.querySelectorAll('.ch')[1] : null; // 생일 열
+    const ilganText = ilganEl ? ilganEl.textContent : '';
 
     const defaultName = `${y}.${m}.${d}`;
     _pendingSave = {
@@ -793,7 +848,7 @@
         time: timeVal,
         sijin: sijin !== undefined ? parseInt(sijin) : null,
         region: rv,
-        pillars: pillarTexts,
+        ilgan: ilganText,
         createdAt: new Date().toISOString(),
       },
     };
@@ -858,21 +913,17 @@
     $empty.style.display = 'none';
 
     $list.innerHTML = list.map(item => {
-      const pillarsHtml = (item.pillars || []).map(p => {
-        // 첫 글자(한글)는 버리고 두번째 글자(한자)만 가져오거나, 그냥 표시
-        return `<span>${p}</span>`;
-      }).join('');
-
       const dateStr = item.date ? item.date.replace(/-/g, '.') : '';
       const timeStr = item.time ? ` ${item.time}` : '';
+      const genderStr = item.gender === '남' ? '남' : '여';
+      const ilgan = item.ilgan || '';
 
       return `
         <div class="saved-card" onclick="loadSaved(${item.id})">
           <div class="saved-info">
-            <div class="saved-name">${escHtml(item.name)}</div>
-            <div class="saved-detail">${dateStr}${timeStr} · ${item.gender === '남' ? '남' : '여'}</div>
+            <span class="saved-name">${escHtml(item.name)}</span>
+            <span class="saved-detail">${dateStr}${timeStr} · ${genderStr}${ilgan ? ' · ' + ilgan + ' 일간' : ''}</span>
           </div>
-          <div class="saved-pillars">${pillarsHtml}</div>
           <button class="saved-del" onclick="deleteSaved(${item.id}, event)" title="삭제">&times;</button>
         </div>
       `;
