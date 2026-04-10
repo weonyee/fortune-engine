@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>만세력</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --border: #ebebeb;
+    --text-primary: #191919;
+    --text-secondary: #666;
+    --text-tertiary: #aaa;
+    --accent: #191919;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,0.07);
+    --transition: 0.18s ease;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+  }
+
+  /* ── 레이아웃 ── */
+  .page {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* ── 헤더 ── */
+  .top-bar {
+    padding: 20px 0 4px;
+    text-align: center;
+  }
+  .top-bar h1 {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── 섹션 ── */
+  .section {
+    margin-top: 24px;
+  }
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-left: 2px;
+  }
+
+  /* ── 성별 토글 ── */
+  .toggle-group {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .toggle-group label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 0;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+  }
+  .toggle-group label + label { border-left: 1px solid var(--border); }
+  .toggle-group input { display: none; }
+  .toggle-group label:has(input:checked) {
+    color: var(--text-primary);
+    font-weight: 600;
+    background: var(--card);
+  }
+  .toggle-group label:has(input:checked)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .toggle-group label:hover { color: var(--text-secondary); }
+
+  /* ── 입력 필드 ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+  .input-box {
+    flex: 1;
+    position: relative;
+  }
+  .field {
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border var(--transition), box-shadow var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field::placeholder { color: #ccc; }
+  .field:hover { border-color: #d0d0d0; }
+  .field:focus {
+    border-color: #bbb;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
+  }
+
+  /* select 화살표 */
+  select.field {
+    cursor: pointer;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' stroke='%23aaa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  /* 시간 입력 */
+  #timeInput { text-align: center; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+  .time-badge {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+  }
+  .time-badge.visible { opacity: 1; }
+
+  /* 체크박스 옵션 */
+  .check-row {
+    margin-top: 8px;
+    padding-left: 2px;
+  }
+  .check-row label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition);
+  }
+  .check-row label:hover { color: var(--text-secondary); }
+  .check-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ── 버튼 ── */
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 32px;
+    padding: 15px 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition);
+    background: #e4e4e2;
+    color: #bbb;
+    pointer-events: none;
+  }
+  .btn.ready {
+    background: var(--accent);
+    color: #fff;
+    pointer-events: auto;
+  }
+  .btn.ready:hover {
+    background: #333;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+  .btn.ready:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── 결과 ── */
+  .result {
+    margin-top: 28px;
+    display: none;
+    animation: fadeUp 0.35s ease;
+  }
+  .result.show { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 만세력 테이블 */
+  .st {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .st th, .st td {
+    border-bottom: 1px solid #f3f3f3;
+    border-right: 1px solid #f3f3f3;
+    padding: 0;
+  }
+  .st th:last-child, .st td:last-child { border-right: none; }
+  .st tbody tr:last-child td { border-bottom: none; }
+
+  .st thead th {
+    padding: 9px 0;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    background: #fcfcfb;
+  }
+  .st .rl {
+    width: 48px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #c0c0c0;
+    background: #fcfcfb;
+    padding: 0 4px;
+    letter-spacing: -0.02em;
+  }
+  .st .cm { padding: 10px 0 5px; }
+  .cm .ch {
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .cm .ot {
+    font-size: 0.58rem;
+    font-weight: 400;
+    margin-top: 1px;
+    display: block;
+    letter-spacing: 0;
+  }
+  .st .cs {
+    padding: 4px 0;
+    font-size: 0.68rem;
+    color: #c5c5c5;
+  }
+  .st .cj {
+    padding: 4px 0;
+    font-size: 0.68rem;
+    color: #bbb;
+    letter-spacing: 2px;
+  }
+  .st .cx {
+    padding: 4px 0;
+    font-size: 0.68rem;
+    color: #d0d0d0;
+  }
+  .empty-cell { color: #e0e0e0 !important; }
+
+  /* 오행 */
+  .el-목 { color: #2d8a4e; }
+  .el-화 { color: #d94040; }
+  .el-토 { color: #b8892a; }
+  .el-금 { color: #7a7a7a; }
+  .el-수 { color: #2776b5; }
+
+  /* 정보박스 */
+  .meta {
+    margin-top: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .meta .r { display: flex; align-items: baseline; gap: 8px; }
+  .meta .l { color: #c0c0c0; min-width: 60px; flex-shrink: 0; }
+  .meta .v { color: var(--text-secondary); }
+  .meta .divider {
+    height: 1px;
+    background: #f3f3f3;
+    margin: 8px 0;
+  }
+
+  /* 저장 버튼 */
+  .btn-save {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 13px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--text-secondary);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .btn-save:hover {
+    border-color: #ccc;
+    color: var(--text-primary);
+  }
+
+  /* 저장 목록 */
+  .saved-section { margin-top: 8px; }
+  .saved-empty {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 0.8rem;
+    color: #d0d0d0;
+  }
+  .saved-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .saved-card:hover {
+    border-color: #d0d0d0;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+  .saved-card:active { transform: translateY(0); box-shadow: var(--shadow); }
+  .saved-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+  .saved-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .saved-detail {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+  }
+  .saved-pillars {
+    display: flex;
+    gap: 6px;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+  .saved-pillars span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .saved-del {
+    margin-left: 10px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .saved-del:hover { background: #f5f5f3; color: #999; }
+
+  /* 모달 */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 24px 20px;
+    width: 320px;
+    max-width: 90vw;
+    transform: translateY(8px) scale(0.97);
+    transition: transform 0.2s ease;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+  }
+  .modal-desc {
+    font-size: 0.78rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    margin-top: 6px;
+    margin-bottom: 18px;
+  }
+  .modal-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: #f7f7f5;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border var(--transition);
+    text-align: center;
+  }
+  .modal-input:focus { border-color: #bbb; }
+  .modal-input::placeholder { color: #ccc; }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .modal-btn.cancel {
+    background: #f0f0ee;
+    color: var(--text-secondary);
+  }
+  .modal-btn.cancel:hover { background: #e8e8e6; }
+  .modal-btn.confirm {
+    background: var(--accent);
+    color: #fff;
+  }
+  .modal-btn.confirm:hover { background: #333; }
+
+  /* 푸터 */
+  .footer {
+    text-align: center;
+    padding: 24px 0 12px;
+    font-size: 0.65rem;
+    color: #d5d5d5;
+    letter-spacing: -0.01em;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="top-bar">
+    <h1>만세력</h1>
+  </div>
+
+  <!-- 성별 -->
+  <div class="section">
+    <div class="section-label">성별</div>
+    <div class="toggle-group">
+      <label><input type="radio" name="gender" value="남" checked><span>남</span></label>
+      <label><input type="radio" name="gender" value="여"><span>여</span></label>
+    </div>
+  </div>
+
+  <!-- 생년월일시 -->
+  <div class="section">
+    <div class="section-label">생년월일시</div>
+    <div class="input-row">
+      <div class="input-box">
+        <input type="text" id="birthdate" class="field" inputmode="numeric" maxlength="14" placeholder="YYYY / MM / DD" autocomplete="off">
+      </div>
+      <div class="input-box" style="flex:0 0 120px; position:relative;">
+        <input type="text" id="timeInput" class="field" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off">
+        <div class="time-badge" id="timeBadge"></div>
+      </div>
+    </div>
+    <div class="check-row">
+      <label><input type="checkbox" id="noTime"> 시간 모름</label>
+    </div>
+  </div>
+
+  <!-- 도시 -->
+  <div class="section">
+    <div class="section-label">도시</div>
+    <select id="region" class="field">
+      <option value="">보정 안함</option>
+      <option value="126.98">서울</option>
+      <option value="129.03">부산</option>
+      <option value="128.60">대구</option>
+      <option value="126.70">인천</option>
+      <option value="126.85">광주</option>
+      <option value="127.38">대전</option>
+      <option value="129.31">울산</option>
+      <option value="127.00">수원</option>
+      <option value="127.73">청주</option>
+      <option value="128.88">포항</option>
+      <option value="126.53">목포</option>
+      <option value="126.57">제주</option>
+      <option value="128.73">강릉</option>
+      <option value="127.15">천안</option>
+    </select>
+  </div>
+
+  <button class="btn" id="calcBtn" onclick="calculate()">만세력 보러가기</button>
+
+  <!-- 결과 -->
+  <div class="result" id="resultWrap">
+    <table class="st" id="sajuTable"></table>
+    <div class="meta" id="infoBox"></div>
+    <button class="btn-save" id="saveBtn" onclick="saveResult()">저장하기</button>
+  </div>
+
+  <!-- 저장 목록 -->
+  <div class="saved-section" id="savedSection">
+    <div class="section-label" style="margin-top:32px;">저장된 만세력</div>
+    <div id="savedList"></div>
+    <div class="saved-empty" id="savedEmpty">저장된 만세력이 없습니다</div>
+  </div>
+
+  <div class="footer">manseryeok-js · 고영창 진짜만세력 기반</div>
+</div>
+
+<!-- 저장 모달 -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <div class="modal-title">만세력 저장</div>
+    <div class="modal-desc">저장할 이름을 입력해주세요</div>
+    <input type="text" id="saveNameInput" class="modal-input" placeholder="예) 홍길동" maxlength="20" autocomplete="off">
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modalCancel">취소</button>
+      <button class="modal-btn confirm" id="modalConfirm">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $noTime = document.getElementById('noTime');
+  const $timeInput = document.getElementById('timeInput');
+  const $timeBadge = document.getElementById('timeBadge');
+  const $btn = document.getElementById('calcBtn');
+  const $date = document.getElementById('birthdate');
+
+  // 시진 매핑 테이블
+  const SIJIN = [
+    { start: 23, end: 1,  label: '23:00 ~ 01:00', value: 0  },
+    { start: 1,  end: 3,  label: '01:00 ~ 03:00', value: 1  },
+    { start: 3,  end: 5,  label: '03:00 ~ 05:00', value: 3  },
+    { start: 5,  end: 7,  label: '05:00 ~ 07:00', value: 5  },
+    { start: 7,  end: 9,  label: '07:00 ~ 09:00', value: 7  },
+    { start: 9,  end: 11, label: '09:00 ~ 11:00', value: 9  },
+    { start: 11, end: 13, label: '11:00 ~ 13:00', value: 11 },
+    { start: 13, end: 15, label: '13:00 ~ 15:00', value: 13 },
+    { start: 15, end: 17, label: '15:00 ~ 17:00', value: 15 },
+    { start: 17, end: 19, label: '17:00 ~ 19:00', value: 17 },
+    { start: 19, end: 21, label: '19:00 ~ 21:00', value: 19 },
+    { start: 21, end: 23, label: '21:00 ~ 23:00', value: 21 },
+  ];
+
+  function matchSijin(h, m) {
+    const t = h * 60 + m; // 분 단위
+    for (const s of SIJIN) {
+      let sMin, eMin;
+      if (s.start > s.end) { // 23~01 자시
+        sMin = s.start * 60;
+        eMin = (s.end + 24) * 60;
+        const tAdj = t < s.start * 60 ? t + 24 * 60 : t;
+        if (tAdj >= sMin && tAdj < eMin) return s;
+      } else {
+        sMin = s.start * 60;
+        eMin = s.end * 60;
+        if (t >= sMin && t < eMin) return s;
+      }
+    }
+    return null;
+  }
+
+  // ── 생년월일 자동 포맷 (8자리 → YYYY/MM/DD) ──
+  $date.addEventListener('input', function() {
+    let raw = this.value.replace(/[^0-9]/g, '');
+    if (raw.length > 8) raw = raw.slice(0, 8);
+
+    if (raw.length >= 5 && raw.length <= 6) {
+      this.value = raw.slice(0, 4) + ' / ' + raw.slice(4);
+    } else if (raw.length >= 7) {
+      this.value = raw.slice(0, 4) + ' / ' + raw.slice(4, 6) + ' / ' + raw.slice(6);
+    } else {
+      this.value = raw;
+    }
+    syncBtn();
+  });
+
+  // 날짜 파싱 헬퍼
+  function parseDateValue() {
+    const raw = $date.value.replace(/[^0-9]/g, '');
+    if (raw.length !== 8) return null;
+    const y = parseInt(raw.slice(0, 4));
+    const m = parseInt(raw.slice(4, 6));
+    const d = parseInt(raw.slice(6, 8));
+    if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+    return { y, m, d, iso: `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}` };
+  }
+
+  // ── 시간 자동 포맷 + 시간 모름 자동 토글 ──
+  $timeInput.addEventListener('input', function() {
+    let raw = this.value.replace(/[^0-9]/g, '');
+    if (raw.length > 4) raw = raw.slice(0, 4);
+
+    // 자동 콜론
+    if (raw.length >= 3) {
+      this.value = raw.slice(0, 2) + ':' + raw.slice(2);
+    } else {
+      this.value = raw;
+    }
+
+    // 4자리 완성 → 시진 매칭 + 시간모름 비활성
+    if (raw.length === 4) {
+      const hh = parseInt(raw.slice(0, 2));
+      const mm = parseInt(raw.slice(2, 4));
+      if (hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59) {
+        const matched = matchSijin(hh, mm);
+        if (matched) {
+          $timeBadge.textContent = matched.label;
+          $timeBadge.classList.add('visible');
+          this.dataset.sijinValue = matched.value;
+        }
+        // 시간 모름 비활성화
+        $noTime.checked = false;
+        $noTime.disabled = true;
+        $noTime.parentElement.style.opacity = '0.35';
+      } else {
+        $timeBadge.textContent = '유효하지 않은 시간';
+        $timeBadge.classList.add('visible');
+        delete this.dataset.sijinValue;
+      }
+    } else {
+      // 미완성 → 시간모름 다시 활성화
+      $timeBadge.textContent = '';
+      $timeBadge.classList.remove('visible');
+      delete this.dataset.sijinValue;
+      $noTime.disabled = false;
+      $noTime.parentElement.style.opacity = '1';
+    }
+    syncBtn();
+  });
+
+  // 시간 모름 수동 체크
+  $noTime.addEventListener('change', function() {
+    $timeInput.disabled = this.checked;
+    $timeInput.style.opacity = this.checked ? '0.35' : '1';
+    if (this.checked) {
+      $timeInput.value = '';
+      $timeBadge.textContent = '';
+      $timeBadge.classList.remove('visible');
+      delete $timeInput.dataset.sijinValue;
+    }
+    syncBtn();
+  });
+
+  function syncBtn() {
+    const dateOk = parseDateValue() !== null;
+    $btn.classList.toggle('ready', dateOk);
+  }
+
+  // ── 로컬스토리지 저장/불러오기 ──
+  const STORAGE_KEY = 'saju_saved';
+
+  function getSaved() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function setSaved(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  // ── 모달 로직 ──
+  const $modal = document.getElementById('saveModal');
+  const $saveInput = document.getElementById('saveNameInput');
+  const $modalCancel = document.getElementById('modalCancel');
+  const $modalConfirm = document.getElementById('modalConfirm');
+  let _pendingSave = null;
+
+  function openModal(defaultName) {
+    $saveInput.value = defaultName;
+    $modal.classList.add('open');
+    setTimeout(() => { $saveInput.focus(); $saveInput.select(); }, 150);
+  }
+  function closeModal() {
+    $modal.classList.remove('open');
+    _pendingSave = null;
+  }
+
+  $modalCancel.addEventListener('click', closeModal);
+  $modal.addEventListener('click', function(ev) {
+    if (ev.target === $modal) closeModal();
+  });
+  $saveInput.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') $modalConfirm.click();
+    if (ev.key === 'Escape') closeModal();
+  });
+
+  $modalConfirm.addEventListener('click', function() {
+    if (!_pendingSave) return;
+    const name = $saveInput.value.trim() || _pendingSave.defaultName;
+    const entry = { ..._pendingSave.entry, name };
+    const list = getSaved();
+    list.unshift(entry);
+    setSaved(list);
+    renderSavedList();
+    closeModal();
+  });
+
+  window.saveResult = function() {
+    const parsed = parseDateValue();
+    if (!parsed) return;
+    const {y,m,d,iso:dv} = parsed;
+    const g = document.querySelector('input[name="gender"]:checked').value;
+    const timeVal = $timeInput.value || '';
+    const sijin = $timeInput.dataset.sijinValue;
+    const rv = document.getElementById('region').value;
+
+    const tbl = document.getElementById('sajuTable');
+    const chars = tbl.querySelectorAll('.ch');
+    const pillarTexts = Array.from(chars).map(el => el.textContent);
+
+    const defaultName = `${y}.${m}.${d}`;
+    _pendingSave = {
+      defaultName,
+      entry: {
+        id: Date.now(),
+        date: dv,
+        gender: g,
+        time: timeVal,
+        sijin: sijin !== undefined ? parseInt(sijin) : null,
+        region: rv,
+        pillars: pillarTexts,
+        createdAt: new Date().toISOString(),
+      },
+    };
+    openModal(defaultName);
+  };
+
+  window.deleteSaved = function(id, evt) {
+    evt.stopPropagation();
+    const list = getSaved().filter(x => x.id !== id);
+    setSaved(list);
+    renderSavedList();
+  };
+
+  window.loadSaved = function(id) {
+    const entry = getSaved().find(x => x.id === id);
+    if (!entry) return;
+
+    // ISO → 표시 포맷
+    const dp = entry.date.replace(/-/g,'');
+    $date.value = dp.slice(0,4) + ' / ' + dp.slice(4,6) + ' / ' + dp.slice(6,8);
+    document.querySelector(`input[name="gender"][value="${entry.gender}"]`).checked = true;
+
+    if (entry.time) {
+      $timeInput.value = entry.time;
+      $timeInput.disabled = false;
+      $timeInput.style.opacity = '1';
+      $noTime.checked = false;
+      if (entry.sijin !== null) {
+        $timeInput.dataset.sijinValue = entry.sijin;
+        // 시진 배지 표시
+        const matched = SIJIN.find(s => s.value === entry.sijin);
+        if (matched) {
+          $timeBadge.textContent = matched.label;
+          $timeBadge.classList.add('visible');
+        }
+      }
+    } else {
+      $timeInput.value = '';
+      $noTime.checked = true;
+      $timeInput.disabled = true;
+      $timeInput.style.opacity = '0.35';
+      $timeBadge.textContent = '';
+      $timeBadge.classList.remove('visible');
+      delete $timeInput.dataset.sijinValue;
+    }
+
+    document.getElementById('region').value = entry.region || '';
+    syncBtn();
+    calculate();
+  };
+
+  function renderSavedList() {
+    const list = getSaved();
+    const $list = document.getElementById('savedList');
+    const $empty = document.getElementById('savedEmpty');
+
+    if (list.length === 0) {
+      $list.innerHTML = '';
+      $empty.style.display = 'block';
+      return;
+    }
+    $empty.style.display = 'none';
+
+    $list.innerHTML = list.map(item => {
+      const pillarsHtml = (item.pillars || []).map(p => {
+        // 첫 글자(한글)는 버리고 두번째 글자(한자)만 가져오거나, 그냥 표시
+        return `<span>${p}</span>`;
+      }).join('');
+
+      const dateStr = item.date ? item.date.replace(/-/g, '.') : '';
+      const timeStr = item.time ? ` ${item.time}` : '';
+
+      return `
+        <div class="saved-card" onclick="loadSaved(${item.id})">
+          <div class="saved-info">
+            <div class="saved-name">${escHtml(item.name)}</div>
+            <div class="saved-detail">${dateStr}${timeStr} · ${item.gender === '남' ? '남' : '여'}</div>
+          </div>
+          <div class="saved-pillars">${pillarsHtml}</div>
+          <button class="saved-del" onclick="deleteSaved(${item.id}, event)" title="삭제">&times;</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // 페이지 로드 시 저장 목록 렌더
+  renderSavedList();
+</script>
+
+<script type="module">
+import { calculateSaju } from './node_modules/@fullstackfamily/manseryeok/dist/index.mjs';
+
+const CG_OH = {'甲':'목','乙':'목','丙':'화','丁':'화','戊':'토','己':'토','庚':'금','辛':'금','壬':'수','癸':'수'};
+const JJ_OH = {'子':'수','丑':'토','寅':'목','卯':'목','辰':'토','巳':'화','午':'화','未':'토','申':'금','酉':'금','戌':'토','亥':'수'};
+const H2C = {'갑':'甲','을':'乙','병':'丙','정':'丁','무':'戊','기':'己','경':'庚','신':'辛','임':'壬','계':'癸'};
+const H2J = {'자':'子','축':'丑','인':'寅','묘':'卯','진':'辰','사':'巳','오':'午','미':'未','신':'申','유':'酉','술':'戌','해':'亥'};
+const OH_HJ = {'목':'木','화':'火','토':'土','금':'金','수':'水'};
+const OI = {'목':0,'화':1,'토':2,'금':3,'수':4};
+const JJG = {
+  '子':['癸'],'丑':['癸','辛','己'],'寅':['戊','丙','甲'],'卯':['乙'],
+  '辰':['乙','癸','戊'],'巳':['戊','庚','丙'],'午':['丙','己','丁'],'未':['丁','乙','己'],
+  '申':['戊','壬','庚'],'酉':['辛'],'戌':['辛','丁','戊'],'亥':['戊','甲','壬'],
+};
+const UN = ['장생','목욕','관대','건록','제왕','쇠','병','사','묘','절','태','양'];
+const US = {'甲':2,'乙':5,'丙':2,'丁':5,'戊':2,'己':5,'庚':8,'辛':11,'壬':8,'癸':11};
+const JO = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const JI = {}; JO.forEach((j,i)=>JI[j]=i);
+
+function unsung(c,j){if(!c||!j)return'';const s=US[c];if(s===undefined)return'';const y=['甲','丙','戊','庚','壬'].includes(c);const o=y?(JI[j]-s+12)%12:(s-JI[j]+12)%12;return UN[o];}
+const SSN=[['비견','겁재'],['식신','상관'],['편재','정재'],['편관','정관'],['편인','정인']];
+function ss(i,t){if(!i||!t)return'';const m=OI[CG_OH[i]],x=OI[CG_OH[t]||JJ_OH[t]];if(m===undefined||x===undefined)return'';const d=(x-m+5)%5;const mY=['乙','丁','己','辛','癸'].includes(i);const tY=['乙','丁','己','辛','癸','丑','卯','巳','未','酉','亥'].includes(t);return SSN[d][mY===tY?0:1];}
+
+function pp(hg,hj){let c,j,ck,jk;if(hj?.length===2){c=hj[0];j=hj[1];}if(hg?.length===2){ck=hg[0];jk=hg[1];if(!c)c=H2C[ck];if(!j)j=H2J[jk];}return{c,j,ck,jk,co:CG_OH[c]||'',jo:JJ_OH[j]||''};}
+function e(o){return o?`el-${o}`:'';}
+
+function render(ps,il){
+  const t=document.getElementById('sajuTable');
+  const hd=['생시','생일','생월','생년'];
+  let h='<thead><tr><th></th>';
+  hd.forEach(x=>h+=`<th>${x}</th>`);
+  h+='</tr></thead><tbody>';
+
+  h+='<tr>';h+='<td class="rl">천간</td>';
+  ps.forEach(p=>{h+=p.c?`<td class="cm"><span class="ch ${e(p.co)}">${p.ck}${p.c}</span><span class="ot ${e(p.co)}">+${p.co}</span></td>`:'<td class="cm empty-cell">—</td>';});
+  h+='</tr><tr><td class="rl">십성</td>';
+  ps.forEach(p=>h+=`<td class="cs">${p.c?ss(il,p.c):''}</td>`);
+  h+='</tr><tr><td class="rl">지지</td>';
+  ps.forEach(p=>{h+=p.j?`<td class="cm"><span class="ch ${e(p.jo)}">${p.jk}${p.j}</span><span class="ot ${e(p.jo)}">+${p.jo}</span></td>`:'<td class="cm empty-cell">—</td>';});
+  h+='</tr><tr><td class="rl">십성</td>';
+  ps.forEach(p=>{const g=p.j&&JJG[p.j];h+=g?`<td class="cs">${ss(il,g[g.length-1])}</td>`:'<td class="cs"></td>';});
+  h+='</tr><tr><td class="rl">지장간</td>';
+  ps.forEach(p=>{const g=p.j&&JJG[p.j];h+=g?`<td class="cj">${g.map(s=>`<span class="${e(CG_OH[s])}">${s}</span>`).join('')}</td>`:'<td class="cj"></td>';});
+  h+='</tr><tr><td class="rl">12운성</td>';
+  ps.forEach(p=>h+=`<td class="cx">${unsung(il,p.j)}</td>`);
+  h+='</tr></tbody>';
+  t.innerHTML=h;
+}
+
+window.calculate=function(){
+  const parsed=parseDateValue();
+  if(!parsed){alert('생년월일을 정확히 입력해주세요.');return;}
+  const{y,m,d}=parsed;
+  if(y<1900||y>2050){alert('1900~2050년 범위만 지원합니다.');return;}
+  const g=document.querySelector('input[name="gender"]:checked').value;
+  const timeEl=document.getElementById('timeInput');
+  const rv=document.getElementById('region').value;
+  try{
+    const o={};if(rv){o.longitude=parseFloat(rv);o.applyTimeCorrection=true;}
+    const hr=timeEl.dataset.sijinValue!==undefined?parseInt(timeEl.dataset.sijinValue):undefined;
+    const s=calculateSaju(y,m,d,hr,0,o);
+    const ps=[pp(s.hourPillar,s.hourPillarHanja),pp(s.dayPillar,s.dayPillarHanja),pp(s.monthPillar,s.monthPillarHanja),pp(s.yearPillar,s.yearPillarHanja)];
+    const il=ps[1].c;
+    render(ps,il);
+
+    let info='';
+    info+=`<div class="r"><span class="l">양력</span><span class="v">${y}년 ${m}월 ${d}일</span></div>`;
+    info+=`<div class="r"><span class="l">성별</span><span class="v">${g==='남'?'남':'여'}</span></div>`;
+    if(s.isTimeCorrected&&s.correctedTime)info+=`<div class="r"><span class="l">보정시간</span><span class="v">${s.correctedTime.hour}시 ${s.correctedTime.minute}분</span></div>`;
+    if(il){const oh=CG_OH[il];info+=`<div class="divider"></div><div class="r"><span class="l">일간</span><span class="v"><strong class="${e(oh)}">${ps[1].ck}${il}</strong>&nbsp;&nbsp;${oh}(${OH_HJ[oh]})</span></div>`;}
+    document.getElementById('infoBox').innerHTML=info;
+    document.getElementById('resultWrap').classList.add('show');
+    setTimeout(()=>document.getElementById('resultWrap').scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }catch(err){alert('계산 오류: '+err.message);console.error(err);}
+};
+</script>
+
+</body>
+</html>
