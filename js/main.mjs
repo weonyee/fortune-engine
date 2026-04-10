@@ -19,11 +19,11 @@ function renderSajuTable(ps, il) {
   h += '</tr></thead><tbody>';
 
   h += '<tr><td class="rl">천간</td>';
-  ps.forEach(p => { h += p.c ? `<td class="cm"><span class="ch ${e(p.co)}">${p.ck}${p.c}</span><span class="ot ${e(p.co)}">+${p.co}</span></td>` : '<td class="cm empty-cell">—</td>'; });
+  ps.forEach(p => { h += p.c ? `<td class="cm"><span class="ch ${e(p.co)}">${p.ck}${p.c}</span><span class="ot ${e(p.co)}"></span></td>` : '<td class="cm empty-cell">—</td>'; });
   h += '</tr><tr><td class="rl">십성</td>';
   ps.forEach(p => h += `<td class="cs">${p.c ? sipsung(il, p.c) : ''}</td>`);
   h += '</tr><tr><td class="rl">지지</td>';
-  ps.forEach(p => { h += p.j ? `<td class="cm"><span class="ch ${e(p.jo)}">${p.jk}${p.j}</span><span class="ot ${e(p.jo)}">+${p.jo}</span></td>` : '<td class="cm empty-cell">—</td>'; });
+  ps.forEach(p => { h += p.j ? `<td class="cm"><span class="ch ${e(p.jo)}">${p.jk}${p.j}</span><span class="ot ${e(p.jo)}"></span></td>` : '<td class="cm empty-cell">—</td>'; });
   h += '</tr><tr><td class="rl">십성</td>';
   ps.forEach(p => { const g = p.j && JJG[p.j]; h += g ? `<td class="cs">${sipsung(il, g[g.length-1])}</td>` : '<td class="cs"></td>'; });
   h += '</tr><tr><td class="rl">지장간</td>';

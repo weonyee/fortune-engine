@@ -3,6 +3,15 @@
  * (non-module, 전역 함수)
  */
 
+// ── 토스트 ──
+window.showToast = function(msg) {
+  const $t = document.getElementById('toast');
+  $t.textContent = msg;
+  $t.classList.add('show');
+  clearTimeout($t._timer);
+  $t._timer = setTimeout(() => $t.classList.remove('show'), 1800);
+};
+
 const $noTime = document.getElementById('noTime');
 const $timeInput = document.getElementById('timeInput');
 const $timeBadge = document.getElementById('timeBadge');
@@ -234,21 +243,29 @@ function renderSavedList() {
 renderSavedList();
 
 // ── 드로어 ──
+function isDesktop() { return window.innerWidth >= 768; }
+
 function toggleDrawer() {
+  if (isDesktop()) return; // 데스크톱에서는 항상 열림
   const d = document.getElementById('drawerOverlay');
   d.classList.toggle('open');
-  if (d.classList.contains('open')) renderDrawer();
+  if (d.classList.contains('open')) { _drawerExpanded = false; renderDrawer(); }
 }
 function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); }
 window.toggleDrawer = toggleDrawer;
 window.closeDrawer = closeDrawer;
 
+let _drawerExpanded = false;
+
 function renderDrawer() {
   const list = getSaved();
   const $d = document.getElementById('drawerList');
-  if (list.length === 0) { $d.innerHTML = '<div class="drawer-empty">저장된 만세력이 없습니다</div>'; return; }
+  if (list.length === 0) { $d.innerHTML = '<div class="drawer-empty">저장된 만세력이 없습니다</div>'; _drawerExpanded = false; return; }
   const CG_OH_MAP = {'甲':'목','乙':'목','丙':'화','丁':'화','戊':'토','己':'토','庚':'금','辛':'금','壬':'수','癸':'수'};
-  $d.innerHTML = list.map(item => {
+  const limit = _drawerExpanded ? list.length : 3;
+  const visible = list.slice(0, limit);
+
+  let html = visible.map(item => {
     const dateStr = item.date ? item.date.replace(/-/g, '.') : '';
     const timeStr = item.time ? ` ${item.time}` : '';
     const genderStr = item.gender === '남' ? '남' : '여';
@@ -258,4 +275,22 @@ function renderDrawer() {
     const elCls = oh ? 'el-' + oh : '';
     return `<div class="drawer-card" onclick="loadSaved(${item.id}); closeDrawer();"><div class="drawer-card-info"><span class="drawer-card-name">${escHtml(item.name)}</span><span class="drawer-card-detail">${dateStr}${timeStr} · ${genderStr}</span></div>${ilgan ? `<span class="drawer-card-ilgan ${elCls}">${ilgan}</span>` : ''}</div>`;
   }).join('');
+
+  if (list.length > 3) {
+    if (_drawerExpanded) {
+      html += `<button class="drawer-more" onclick="toggleDrawerExpand()">접기</button>`;
+    } else {
+      html += `<button class="drawer-more" onclick="toggleDrawerExpand()">더 보기</button>`;
+    }
+  }
+
+  $d.innerHTML = html;
 }
+
+window.toggleDrawerExpand = function() {
+  _drawerExpanded = !_drawerExpanded;
+  renderDrawer();
+};
+
+// 데스크톱: 페이지 로드 시 사이드바 자동 렌더
+if (isDesktop()) renderDrawer();

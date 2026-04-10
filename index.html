@@ -15,7 +15,7 @@
     <button class="hamburger" onclick="toggleDrawer()" aria-label="메뉴">
       <span></span><span></span><span></span>
     </button>
-    <h1>만세력</h1>
+    <h1>사주</h1>
   </div>
 
   <!-- 성별 -->
@@ -51,24 +51,27 @@
     <div class="section-label">도시</div>
     <select id="region" class="field">
       <option value="">보정 안함</option>
-      <option value="126.98">서울</option>
-      <option value="129.03">부산</option>
-      <option value="128.60">대구</option>
-      <option value="126.70">인천</option>
-      <option value="126.85">광주</option>
-      <option value="127.38">대전</option>
-      <option value="129.31">울산</option>
-      <option value="127.00">수원</option>
-      <option value="127.73">청주</option>
-      <option value="128.88">포항</option>
-      <option value="126.53">목포</option>
-      <option value="126.57">제주</option>
-      <option value="128.73">강릉</option>
-      <option value="127.15">천안</option>
+      <option value="126.98">서울특별시</option>
+      <option value="129.03">부산광역시</option>
+      <option value="128.60">대구광역시</option>
+      <option value="126.70">인천광역시</option>
+      <option value="126.85">광주광역시</option>
+      <option value="127.38">대전광역시</option>
+      <option value="129.31">울산광역시</option>
+      <option value="127.03">세종특별자치시</option>
+      <option value="127.00">경기도</option>
+      <option value="128.21">강원도</option>
+      <option value="127.38">충청북도</option>
+      <option value="126.80">충청남도</option>
+      <option value="127.15">전라북도</option>
+      <option value="126.81">전라남도</option>
+      <option value="128.57">경상북도</option>
+      <option value="128.68">경상남도</option>
+      <option value="126.57">제주특별자치도</option>
     </select>
   </div>
 
-  <button class="btn" id="calcBtn" onclick="calculate()">만세력 보러가기</button>
+  <button class="btn" id="calcBtn" onclick="calculate()">운세 보러가기</button>
 
   <!-- 결과 -->
   <div class="result" id="resultWrap">
@@ -113,10 +116,25 @@
 <!-- 사이드 드로어 -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
   <div class="drawer" onclick="event.stopPropagation()">
-    <div class="drawer-header">저장된 만세력</div>
-    <div class="drawer-body" id="drawerList"></div>
+    <div class="drawer-header">
+      <span>저장된 만세력</span>
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="닫기">
+&lsaquo;
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div id="drawerList"></div>
+      <div class="drawer-menu-section">
+        <button class="drawer-menu-item disabled" onclick="showToast('준비 중입니다')">
+          <span>오늘의 금전운</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
 
 <!-- ── UI 로직 ── -->
 <script src="js/ui.js"></script>
